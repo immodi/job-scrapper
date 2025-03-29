@@ -24,7 +24,7 @@ def scrape_jobs(data: job_posting.ApiJobPosting):
             hours_old=data.hours_old,
             is_remote=data.is_remote
         ),
-        export_to_csv=False
+        export_to_csv=True
     )
 
     drop_columns = ["min_amount", "max_amount"]
@@ -32,8 +32,6 @@ def scrape_jobs(data: job_posting.ApiJobPosting):
         columns=[col for col in drop_columns if col in jobs.columns])
     jobs.replace([np.inf, -np.inf], np.nan, inplace=True)  # Convert inf -> NaN
     jobs.fillna("", inplace=True)  # Convert NaN -> empty string
-    jobs["custom_cover_letter"] = jobs["description"].apply(
-        lambda job_description: get_cover_letter(job_description))
 
     return jobs.to_dict(orient="records")
 
