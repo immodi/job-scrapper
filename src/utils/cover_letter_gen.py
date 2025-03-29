@@ -1,9 +1,14 @@
 from groq import Groq
 import os
 
-client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY"),
-)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    client = Groq(
+        api_key=os.environ.get("GROQ_API_KEY"),
+    )
+except Exception as e:
+    print(e)
 
 
 def get_cover_letter(job_description: str) -> str:

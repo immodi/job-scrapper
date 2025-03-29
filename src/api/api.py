@@ -1,6 +1,6 @@
-from src.utils.scrapper import get_job_postings
+from src.utils.scrapper import get_job_postings, export_to_csv
 from src.entities import job_posting
-from src.utils.cover_letter_gen import get_cover_letter
+from src.utils.google_search import google_search
 from fastapi import FastAPI
 import numpy as np
 import uvicorn
@@ -23,8 +23,7 @@ def scrape_jobs(data: job_posting.ApiJobPosting):
             results_wanted=data.results_wanted,
             hours_old=data.hours_old,
             is_remote=data.is_remote
-        ),
-        export_to_csv=True
+        )
     )
 
     drop_columns = ["min_amount", "max_amount"]
@@ -32,6 +31,12 @@ def scrape_jobs(data: job_posting.ApiJobPosting):
         columns=[col for col in drop_columns if col in jobs.columns])
     jobs.replace([np.inf, -np.inf], np.nan, inplace=True)  # Convert inf -> NaN
     jobs.fillna("", inplace=True)  # Convert NaN -> empty string
+
+    jobs.loc[jobs["job_url_direct"].isna() | (jobs["job_url_direct"] == ""), "job_url_direct"] = jobs["company"].apply(
+        lambda company_name: google_search(f"{company_name} jobs")
+    )
+
+    export_to_csv(jobs, data.search_term)
 
     return jobs.to_dict(orient="records")
 

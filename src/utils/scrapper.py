@@ -5,7 +5,7 @@ from pandas import DataFrame as DataFrame
 import csv
 
 
-def get_job_postings(job_posting: job_posting.JobPosting, export_to_csv: bool = False) -> DataFrame:
+def get_job_postings(job_posting: job_posting.JobPosting) -> DataFrame:
     SOURCES = ["indeed", "linkedin", "zip_recruiter"]
 
     if not check_if_valid_country(job_posting.location):
@@ -22,14 +22,15 @@ def get_job_postings(job_posting: job_posting.JobPosting, export_to_csv: bool = 
         is_remote=job_posting.is_remote
     )
 
-    if export_to_csv:
-        timestamp = datetime.now().strftime("%y%m%d%H%M")
-        filename = f"{timestamp}_{job_posting.search_term.replace(' ', '_')}.csv"
-
-        jobs.to_csv(filename, quoting=csv.QUOTE_NONNUMERIC,
-                    escapechar="\\", index=False)
-
     return jobs
+
+
+def export_to_csv(jobs: DataFrame, search_term: str):
+    timestamp = datetime.now().strftime("%y%m%d%H%M")
+    filename = f"{timestamp}_{search_term.replace(' ', '_')}.csv"
+
+    jobs.to_csv(filename, quoting=csv.QUOTE_NONNUMERIC,
+                escapechar="\\", index=False)
 
 
 def check_if_valid_country(country: str):
